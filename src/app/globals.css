@@ -1,0 +1,110 @@
+@import "tailwindcss";
+
+/* Design tokens, shared with the app (app-demo/src/app/globals.css). Keep them in sync. */
+:root {
+  --bg: #f7faf9;
+  --surface: #ffffff;
+  --ink: #0f2a2e;
+  --ink-soft: #4f6e6b;      /* 5.6:1 on cards */
+  --accent: #0f766e;        /* primary actions: friend swipe, send, CTA buttons */
+  --accent-ink: #7a4b0a;    /* text on amber surfaces */
+  --green: #115e59;         /* active tab underline, tag category labels, "matched" states */
+  --green-soft: #e3f4f1;    /* prompt card backgrounds, active tab pill bg */
+  --mustard: #f5b83d;       /* accent: shared-interest highlights */
+  --mustard-soft: #fdf1da;
+  --line: #dce9e6;
+  --frame: #0b1f22;
+  --danger: #b3261e;        /* errors only — never the brand colours */
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-green: var(--green);
+  --color-green-soft: var(--green-soft);
+  --color-mustard: var(--mustard);
+  --color-mustard-soft: var(--mustard-soft);
+  --color-line: var(--line);
+  --color-danger: var(--danger);
+  --color-frame: var(--frame);
+  --font-serif: var(--font-fraunces), Georgia, serif;
+  --font-sans: var(--font-work-sans), system-ui, sans-serif;
+  --shadow-card: 0 1px 2px rgb(30 43 35 / 0.06), 0 8px 24px rgb(30 43 35 / 0.08);
+  --shadow-phone: 0 30px 80px rgb(11 31 34 / 0.28);
+  --animate-float: float 6s ease-in-out infinite;
+
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-8px);
+    }
+  }
+}
+
+html {
+  background: var(--bg);
+  scroll-padding-top: 5rem; /* keeps anchored sections clear of the sticky site header */
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-tap-highlight-color: transparent;
+}
+
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-3 text-[15px] font-semibold transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-45;
+}
+@utility btn-primary {
+  @apply btn bg-accent text-white shadow-[0_6px_16px_rgb(15_118_110/0.30)] hover:brightness-105;
+}
+@utility btn-secondary {
+  @apply btn border border-line bg-surface text-ink hover:bg-green-soft;
+}
+@utility btn-ghost {
+  @apply btn text-ink-soft hover:bg-green-soft;
+}
+@utility card {
+  @apply rounded-3xl bg-surface shadow-card;
+}
+@utility field {
+  @apply w-full rounded-2xl border border-line bg-surface px-4 py-3 text-[15px] text-ink outline-none placeholder:text-ink-soft/60 focus:border-green focus:ring-2 focus:ring-green/20;
+}
+@utility label {
+  @apply mb-1.5 block text-xs font-semibold tracking-wide text-ink-soft uppercase;
+}
+@utility pill {
+  @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium;
+}
+
+/* Centred content column. */
+@utility site-container {
+  @apply mx-auto w-full max-w-6xl px-5 sm:px-8;
+}
+
+/* Small uppercase label above section headings. */
+@utility eyebrow {
+  @apply text-xs font-semibold tracking-[0.12em] uppercase;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+  }
+}
