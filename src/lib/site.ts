@@ -24,8 +24,10 @@ export const SITE = {
   /**
    * The web version of the app (the app-demo project, served at /app-demo on the
    * same domain). Mentioned once, in the FAQ. Set to null to stop linking it.
+   * Links to sign-in, not /app-demo itself: once the app's MAIN_SITE_URL is set,
+   * /app-demo sends signed-out visitors back to this site's home page.
    */
-  webPreviewUrl: `${ORIGIN}/app-demo` as string | null,
+  webPreviewUrl: `${ORIGIN}/app-demo/login` as string | null,
 } as const;
 
 /** Pages anyone can read (also the sitemap). */
