@@ -26,9 +26,14 @@ const store = {
 
 const SOURCE_KEY = "sidekick:source";
 
-/** Remembers where the visitor came from (?ref=, utm_*, referrer) for the rest of the visit. */
+/**
+ * Remembers where the visitor came from (?ref=, utm_*, referrer) for the rest of the visit.
+ * The first source wins: document.referrer doesn't change while moving between pages, so
+ * re-reading it on /join would replace a landing page's ?ref= with the referring site.
+ */
 function rememberSource() {
   try {
+    if (sessionStorage.getItem(SOURCE_KEY)) return;
     const source = sourceFromLocation(location.search, document.referrer, location.host);
     if (source) sessionStorage.setItem(SOURCE_KEY, source);
   } catch {

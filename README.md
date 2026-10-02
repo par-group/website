@@ -35,6 +35,7 @@ No setup is needed locally: waitlist signups go to a SQLite file in `./data`. Co
 | Path | What it's for |
 | --- | --- |
 | `/` | Home: waitlist signup, how the app works, safety, campuses, FAQ |
+| `/join` | The waitlist on its own page, where the header's **Join the waitlist** button goes. Good for links on posters and posts |
 | `/safety` | Protections, community guidelines, meeting tips, reporting and crisis resources |
 | `/support` | Waitlist and account help (App Store **Support URL**) |
 | `/privacy` | Privacy Policy covering the website, waitlist and app (App Store **Privacy Policy URL**) |
@@ -66,7 +67,7 @@ docs/                  Deployment, the waitlist export and the /app-demo setup
 2. Two optional questions follow: where they study (pre-filled for York email addresses) and which phone they use.
 3. The confirmation offers a share link (`?ref=share`).
 
-Spam protection is a hidden honeypot field: submissions that fill it get a normal-looking success and nothing is stored. The source label comes from `?ref=`, `utm_*` or the referring site, and is kept for the visit in `sessionStorage`.
+Spam protection is a hidden honeypot field: submissions that fill it get a normal-looking success and nothing is stored. The source label comes from `?ref=`, `utm_*` or the referring site, and the first one is kept for the visit in `sessionStorage`.
 
 Data lives in one table, `waitlist_signups`, in Turso in production (the app's database can be reused) and a local SQLite file in development. See [docs/deployment.md](docs/deployment.md).
 

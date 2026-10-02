@@ -21,7 +21,7 @@ export function SiteHeader() {
               {label}
             </Link>
           ))}
-          <Link href="/#waitlist" className="btn-primary ml-2 px-4 py-2 text-sm">
+          <Link href="/join" className="btn-primary ml-2 px-4 py-2 text-sm">
             Join the waitlist
           </Link>
         </nav>

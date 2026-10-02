@@ -31,7 +31,7 @@ export const SITE = {
 } as const;
 
 /** Pages anyone can read (also the sitemap). */
-export const PUBLIC_PAGES = ["/", "/safety", "/support", "/privacy", "/terms"] as const;
+export const PUBLIC_PAGES = ["/", "/join", "/safety", "/support", "/privacy", "/terms"] as const;
 
 /** Date shown on the Privacy Policy and Terms. Update it whenever either changes. */
 export const LEGAL_LAST_UPDATED = "September 29, 2026";
