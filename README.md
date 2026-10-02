@@ -40,6 +40,8 @@ No setup is needed locally: waitlist signups go to a SQLite file in `./data`. Co
 | `/support` | Waitlist and account help (App Store **Support URL**) |
 | `/privacy` | Privacy Policy covering the website, waitlist and app (App Store **Privacy Policy URL**) |
 | `/terms` | Terms of Use |
+| `/invite/…` | Where invite links land without the app installed. With it installed, they open the app instead ([App links](docs/deployment.md#6-app-links)) |
+| `/.well-known/…` | The files that let invite links open the app: `apple-app-site-association` (iOS) and `assetlinks.json` (Android) |
 | `/api/waitlist/export` | Password-protected CSV of every signup |
 | `/api/health` | Which settings are configured, and whether the database is reachable |
 | `/app-demo/…` | The app, proxied from its own Vercel project when `APP_DEMO_ORIGIN` is set |
@@ -58,7 +60,7 @@ src/
   lib/                 Site config (site.ts) and waitlist input rules, safe for the browser
   server/              Server-only: database, waitlist queries, Server Actions
 tests/                 Node test runner suites against a real temp SQLite database
-docs/                  Deployment, the waitlist export and the /app-demo setup
+docs/                  Deployment, the waitlist export, the /app-demo setup and app links
 ```
 
 ## How the waitlist works

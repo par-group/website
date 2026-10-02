@@ -65,13 +65,63 @@ The app's `basePath` is `/app-demo`, so both projects can share the domain ([Nex
 `trysidekick.ca` points at Vercel already (see the app's `docs/deployment.md` for the DNS records). To switch the root over to the website:
 
 1. In the **app-demo** project, **Settings → Domains**, remove `trysidekick.ca` and `www.trysidekick.ca`.
-2. In **this** project, add both, with `www.trysidekick.ca` as the primary domain and the apex redirecting to it.
+2. In **this** project, add both. Make `www.trysidekick.ca` the primary domain, and connect `trysidekick.ca` to **Production** as well, **not** as a redirect to www. The site redirects the apex to www itself (`next.config.ts`), except for `/.well-known/`, which invite links need on both hosts ([App links](#6-app-links)). If the apex is already a redirect, open **Edit** on it and switch it to **Connect to an environment → Production**.
 
 DNS records don't change, since both projects are on Vercel. Check `https://www.trysidekick.ca/api/health` and `https://www.trysidekick.ca/app-demo/api/health` afterwards.
 
+## 6. App links
+
+Invite links like `https://trysidekick.ca/invite/abc` open the app when it's installed (iOS universal links and Android App Links), and this site's `/invite/…` page when it isn't. That page introduces Sidekick and offers the waitlist, or the App Store once the app is listed. Only `/invite/…` opens the app: the rest of the site always stays in the browser.
+
+### On the website
+
+Set these in Vercel and redeploy. `/api/health` shows `iosAppLinks` and `androidAppLinks` as `true` once they're valid.
+
+| Variable | What it is | Where to find it |
+| --- | --- | --- |
+| `APPLE_APP_IDS` | `<Team ID>.<bundle ID>`, e.g. `ABCDE12345.ca.trysidekick.app` | Team ID: developer.apple.com → Account → Membership details. Bundle ID: the app's Xcode target |
+| `ANDROID_PACKAGE_NAME` | The app's `applicationId`, e.g. `ca.trysidekick.app` | The app's `build.gradle` |
+| `ANDROID_CERT_SHA256` | SHA-256 fingerprint of the certificate that signs the installed app | Play Console → App integrity → App signing → **App signing key certificate**. To test builds installed outside Play, add the upload or debug key's fingerprint too, comma-separated |
+
+Until they're set, `/.well-known/apple-app-site-association` and `/.well-known/assetlinks.json` return 404 and invite links just open the website.
+
+Apple and Google fetch both files from each host a link can use, and give up on a redirect. That's why the apex can't be a Vercel redirect (step 5). After deploying, each of these should print `HTTP/2 200` and `content-type: application/json`, and no `location:` line:
+
+```bash
+curl -sI https://trysidekick.ca/.well-known/apple-app-site-association
+curl -sI https://www.trysidekick.ca/.well-known/apple-app-site-association
+curl -sI https://trysidekick.ca/.well-known/assetlinks.json
+curl -sI https://www.trysidekick.ca/.well-known/assetlinks.json
+```
+
+### In the app
+
+- **iOS**: add the **Associated Domains** capability with `applinks:trysidekick.ca` and `applinks:www.trysidekick.ca`, and open the invite from the incoming URL (`onOpenURL` in SwiftUI). While developing, `applinks:trysidekick.ca?mode=developer` reads the file straight from the site instead of Apple's cache (turn on **Associated Domains Development** in the iPhone's Developer settings).
+- **Android**: add this to the main activity in `AndroidManifest.xml`, and open the invite from the intent's URL:
+
+  ```xml
+  <intent-filter android:autoVerify="true">
+    <action android:name="android.intent.action.VIEW" />
+    <category android:name="android.intent.category.DEFAULT" />
+    <category android:name="android.intent.category.BROWSABLE" />
+    <data android:scheme="https" />
+    <data android:host="trysidekick.ca" />
+    <data android:host="www.trysidekick.ca" />
+    <data android:pathPrefix="/invite/" />
+  </intent-filter>
+  ```
+
+- Share invites as `https://trysidekick.ca/invite/<code>`. If the friend installs the app first, opening the link again takes them to the invite.
+
+### Checking it works
+
+- **iOS**: Apple's cache can take up to a day to pick up changes. See what it has at `https://app-site-association.cdn-apple.com/a/v1/trysidekick.ca`. Test by tapping a link in Notes or Messages: typing it into Safari, or tapping it on a trysidekick.ca page, opens the website by design.
+- **Android**: `adb shell pm get-app-links ca.trysidekick.app` should say `verified` for both hosts. Google's view: `https://digitalassetlinks.googleapis.com/v1/statements:list?source.web.site=https://trysidekick.ca&relation=delegate_permission/common.handle_all_urls`.
+
 ## Launch day
 
-- Set `APP_STORE_ID` in `src/lib/site.ts` to the listing's numeric ID. The "Coming soon" badges turn into links, and iPhone visitors see Safari's Smart App Banner.
+- Set `APP_STORE_ID` in `src/lib/site.ts` to the listing's numeric ID. The "Coming soon" badges turn into links, and iPhone visitors see Safari's Smart App Banner. The invite page switches from the waitlist to the App Store.
+- Make sure `/api/health` shows `iosAppLinks: true` (and `androidAppLinks` once there's an Android app), so invites open the app from day one.
 - Replace `AppStoreBadge` with Apple's official "Download on the App Store" badge from Apple's marketing resources, as Apple's guidelines require.
 - In App Store Connect, use `https://www.trysidekick.ca/support` as the Support URL, `https://www.trysidekick.ca/privacy` as the Privacy Policy URL and `https://www.trysidekick.ca` as the Marketing URL.
 - Update `LEGAL_LAST_UPDATED` in `src/lib/site.ts` whenever the Privacy Policy or Terms change.

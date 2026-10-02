@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   description: SITE.description,
   applicationName: SITE.name,
   formatDetection: { telephone: false },
-  openGraph: { type: "website", siteName: SITE.name, locale: "en_CA", url: "/" },
+  openGraph: { type: "website", siteName: SITE.name, locale: "en_CA" },
   twitter: { card: "summary_large_image" },
   // Safari's Smart App Banner, once the app is on the App Store.
   ...(SITE.appStoreId && { itunes: { appId: SITE.appStoreId } }),

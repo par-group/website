@@ -1,3 +1,4 @@
+import { androidApp, appleAppIds } from "@/server/app-links";
 import { db, IS_HOSTED_DB } from "@/server/db";
 
 /**
@@ -10,6 +11,8 @@ export async function GET() {
     databaseAuthToken: !!process.env.TURSO_AUTH_TOKEN,
     waitlistExport: !!process.env.WAITLIST_EXPORT_PASSWORD,
     appDemoRewrite: !!process.env.APP_DEMO_ORIGIN,
+    iosAppLinks: appleAppIds().length > 0,
+    androidAppLinks: !!androidApp(),
     onVercel: !!process.env.VERCEL,
   };
 

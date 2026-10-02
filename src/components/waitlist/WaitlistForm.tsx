@@ -27,14 +27,15 @@ const store = {
 const SOURCE_KEY = "sidekick:source";
 
 /**
- * Remembers where the visitor came from (?ref=, utm_*, referrer) for the rest of the visit.
- * The first source wins: document.referrer doesn't change while moving between pages, so
- * re-reading it on /join would replace a landing page's ?ref= with the referring site.
+ * Remembers where the visitor came from for the rest of the visit: the page's own source
+ * (an invite link), else ?ref=, utm_* or the referring site. The first source wins:
+ * document.referrer doesn't change while moving between pages, so re-reading it on /join
+ * would replace a landing page's ?ref= with the referring site.
  */
-function rememberSource() {
+function rememberSource(pageSource?: string) {
   try {
     if (sessionStorage.getItem(SOURCE_KEY)) return;
-    const source = sourceFromLocation(location.search, document.referrer, location.host);
+    const source = pageSource ?? sourceFromLocation(location.search, document.referrer, location.host);
     if (source) sessionStorage.setItem(SOURCE_KEY, source);
   } catch {
     // storage blocked: the signup just has no source
@@ -49,11 +50,20 @@ function currentSource() {
   }
 }
 
-export function WaitlistForm({ tone = "light", buttonLabel = "Join the waitlist" }: { tone?: "light" | "teal"; buttonLabel?: string }) {
+export function WaitlistForm({
+  tone = "light",
+  buttonLabel = "Join the waitlist",
+  source,
+}: {
+  tone?: "light" | "teal";
+  buttonLabel?: string;
+  /** Where signups from this page come from, when the URL doesn't say (e.g. "invite"). */
+  source?: string;
+}) {
   const key = useId();
   const current = useSyncExternalStore(store.subscribe, store.get, () => null);
 
-  useEffect(rememberSource, []);
+  useEffect(() => rememberSource(source), [source]);
 
   if (!current) return <EmailStep owner={key} tone={tone} buttonLabel={buttonLabel} />;
   if (current.owner !== key) {
