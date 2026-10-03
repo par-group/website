@@ -42,6 +42,7 @@ No setup is needed locally: waitlist signups go to a SQLite file in `./data`. Co
 | `/terms` | Terms of Use |
 | `/invite/…` | Where invite links land without the app installed. With it installed, they open the app instead ([App links](docs/deployment.md#6-app-links)) |
 | `/.well-known/…` | The files that let invite links open the app: `apple-app-site-association` (iOS) and `assetlinks.json` (Android) |
+| `/dashboard` | Password-protected weekly metrics: waitlist, onboarding, connections, retention, conversations ([details](docs/deployment.md#7-metrics-dashboard)) |
 | `/api/waitlist/export` | Password-protected CSV of every signup |
 | `/api/health` | Which settings are configured, and whether the database is reachable |
 | `/app-demo/…` | The app, proxied from its own Vercel project when `APP_DEMO_ORIGIN` is set |

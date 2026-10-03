@@ -118,6 +118,29 @@ curl -sI https://www.trysidekick.ca/.well-known/assetlinks.json
 - **iOS**: Apple's cache can take up to a day to pick up changes. See what it has at `https://app-site-association.cdn-apple.com/a/v1/trysidekick.ca`. Test by tapping a link in Notes or Messages: typing it into Safari, or tapping it on a trysidekick.ca page, opens the website by design.
 - **Android**: `adb shell pm get-app-links ca.trysidekick.app` should say `verified` for both hosts. Google's view: `https://digitalassetlinks.googleapis.com/v1/statements:list?source.web.site=https://trysidekick.ca&relation=delegate_permission/common.handle_all_urls`.
 
+## 7. Metrics dashboard
+
+`/dashboard` shows the numbers to check every week: waitlist → accounts, onboarding completion, time to first connection, D1/D7/D30 retention, reply rate and chats reaching 10+ messages. Each tile shows the last full week (Monday to Sunday, Toronto time) against the week before, and a table below has eight weeks of every number. Only real students count: the app's sample profiles and demo account are left out.
+
+1. Set `DASHBOARD_PASSWORD` to a long random value. Open `https://www.trysidekick.ca/dashboard` and enter it (any username). Without the variable, the page doesn't exist.
+2. Connect the app's database, which the dashboard only reads:
+   - if the waitlist **reuses the app's Turso database** (step 2), there's nothing to do;
+   - otherwise set `APP_DATABASE_URL` to the app's `TURSO_DATABASE_URL`, and `APP_DATABASE_AUTH_TOKEN` to a **read-only** token, so the website can never change the app's data: `turso db tokens create <database> --read-only`.
+3. Redeploy, and check `/api/health`: `appDatabase` should say `ok: true`, with how it's connected.
+
+Without the app's database the dashboard still shows the waitlist, with a note at the top.
+
+### What it can't measure yet
+
+Some numbers need data the app doesn't record. The tiles say so instead of guessing:
+
+| Metric | Today | What would make it exact |
+| --- | --- | --- |
+| Waitlist → install rate | Waitlist emails that have an app account | After launch, installs are in App Store Connect’s App Analytics |
+| Invites sent per user, invite → active | Not tracked. The dashboard shows waitlist signups from invite links | The app recording each invite: who sent it, and who joined from it |
+| Reports per 1,000 users | Not tracked: reports arrive by email | In-app reporting ([launch checklist](https://github.com/parsasalama6t/sidekick/blob/main/app-demo/docs/launch-checklist.md)) |
+| D1 / D7 / D30 retention | Counts a day if someone swiped, commented, replied or messaged | The app recording each day someone opens it |
+
 ## Launch day
 
 - Set `APP_STORE_ID` in `src/lib/site.ts` to the listing's numeric ID. The "Coming soon" badges turn into links, and iPhone visitors see Safari's Smart App Banner. The invite page switches from the waitlist to the App Store.

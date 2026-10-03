@@ -1,4 +1,4 @@
-import crypto from "node:crypto";
+import { hasPassword, passwordRequired } from "@/server/basic-auth";
 import { listSignups } from "@/server/waitlist";
 
 /**
@@ -10,12 +10,7 @@ import { listSignups } from "@/server/waitlist";
 export async function GET(request: Request) {
   const password = process.env.WAITLIST_EXPORT_PASSWORD;
   if (!password) return new Response("Not found", { status: 404 });
-  if (!isAuthorized(request, password)) {
-    return new Response("Password required", {
-      status: 401,
-      headers: { "WWW-Authenticate": 'Basic realm="Sidekick waitlist", charset="UTF-8"', "Cache-Control": "no-store" },
-    });
-  }
+  if (!hasPassword(request.headers.get("authorization"), password)) return passwordRequired("Sidekick waitlist");
 
   const rows = await listSignups();
   const iso = (ms: number) => new Date(ms).toISOString();
@@ -34,16 +29,6 @@ export async function GET(request: Request) {
       "X-Robots-Tag": "noindex",
     },
   });
-}
-
-/** Basic auth, compared in constant time; the username is ignored. */
-function isAuthorized(request: Request, password: string) {
-  const [scheme, encoded] = (request.headers.get("authorization") ?? "").split(" ");
-  if (scheme !== "Basic" || !encoded) return false;
-  const decoded = Buffer.from(encoded, "base64").toString("utf8");
-  const given = decoded.slice(decoded.indexOf(":") + 1);
-  const digest = (s: string) => crypto.createHash("sha256").update(s).digest();
-  return crypto.timingSafeEqual(digest(given), digest(password));
 }
 
 /** Quotes every cell, and defuses values a spreadsheet would run as a formula (school and source are typed by visitors). */

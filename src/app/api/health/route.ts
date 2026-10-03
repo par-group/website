@@ -1,3 +1,4 @@
+import { appDb } from "@/server/app-db";
 import { androidApp, appleAppIds } from "@/server/app-links";
 import { db, IS_HOSTED_DB } from "@/server/db";
 
@@ -13,6 +14,7 @@ export async function GET() {
     appDemoRewrite: !!process.env.APP_DEMO_ORIGIN,
     iosAppLinks: appleAppIds().length > 0,
     androidAppLinks: !!androidApp(),
+    dashboard: !!process.env.DASHBOARD_PASSWORD,
     onVercel: !!process.env.VERCEL,
   };
 
@@ -24,5 +26,15 @@ export async function GET() {
     database = { ok: false, detail: e instanceof Error ? e.message : String(e) };
   }
 
-  return Response.json({ ok: database.ok, configured, database }, { status: database.ok ? 200 : 503, headers: { "Cache-Control": "no-store" } });
+  // The app's database, for the dashboard: how it's connected, and whether its tables can be read.
+  let appDatabase: { ok: boolean; detail: string };
+  try {
+    const app = await appDb();
+    if (app) await app.client.execute("SELECT 1 FROM users LIMIT 1");
+    appDatabase = app ? { ok: true, detail: app.via } : { ok: false, detail: "not connected" };
+  } catch (e) {
+    appDatabase = { ok: false, detail: e instanceof Error ? e.message : String(e) };
+  }
+
+  return Response.json({ ok: database.ok, configured, database, appDatabase }, { status: database.ok ? 200 : 503, headers: { "Cache-Control": "no-store" } });
 }
