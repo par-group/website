@@ -105,10 +105,10 @@ export default async function DashboardPage() {
 
       {!app.ok && (
         <div role="status" className="mt-6 rounded-2xl border border-mustard bg-mustard-soft px-5 py-4 text-sm text-accent-ink">
-          {app.reason === "not connected" ? (
+          {app.reason === "no app data yet" ? (
             <>
-              <strong>The app’s database isn’t connected</strong>, so only the waitlist numbers show. Set <code>APP_DATABASE_URL</code> and{" "}
-              <code>APP_DATABASE_AUTH_TOKEN</code> in Vercel and redeploy (docs/deployment.md, “7. Metrics dashboard”).
+              <strong>No app data yet</strong>, so only the waitlist numbers show. The app creates its tables the first time it runs on its database
+              (the waitlist’s, from launch), and these tiles fill in by themselves. See docs/deployment.md, “7. Metrics dashboard”.
             </>
           ) : (
             <>

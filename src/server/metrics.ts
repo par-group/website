@@ -40,7 +40,10 @@ export type Dashboard = {
     withAccount: number | null;
     toAccount: Cell<Rate>[] | null;
   };
-  /** `accounts`: real students with an account, all time. */
+  /**
+   * `accounts`: real students with an account, all time. Not ok with reason
+   * "no app data yet" until the app has run on its database.
+   */
   app: { ok: true; via: string; accounts: number; metrics: AppMetrics } | { ok: false; reason: string };
 };
 
@@ -192,8 +195,8 @@ export async function loadDashboard(now = Date.now()): Promise<Dashboard> {
   let appEmails: Set<string> | null = null;
   try {
     const database = await appDb();
-    if (!database) {
-      app = { ok: false, reason: "not connected" };
+    if (!database.ready) {
+      app = { ok: false, reason: "no app data yet" };
     } else {
       const emails = await query<{ email: string }>(database.client, "SELECT lower(trim(email)) AS email FROM users WHERE is_sandbox = 0");
       app = { ok: true, via: database.via, accounts: emails.length, metrics: await appMetrics(database.client, weeks, now) };

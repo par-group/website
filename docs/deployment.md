@@ -10,12 +10,9 @@ Import this repository into Vercel. Everything stays on the defaults: framework 
 
 ## 2. Waitlist database: Turso
 
-The waitlist needs `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN`. Either:
+The waitlist needs `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN`, which Vercel sets when a Turso database is connected to the project (**Storage → Create → Turso**, or **Connect Database** for an existing one). The table is created automatically on the first signup or health check.
 
-- **reuse the app's database**: copy the two values from the app-demo project's environment variables. The website only creates and uses its own table, `waitlist_signups`, and never touches the app's tables; or
-- **create a separate database** under **Storage → Create → Turso**, if you'd rather keep the waitlist apart.
-
-The table is created automatically on the first signup or health check.
+**One database for the website and the app.** The waitlist's database is named `waitlist`, and the app uses it too from launch: in the app's Vercel project, **Storage → Connect Database → `waitlist`**. The website only creates and uses its own table, `waitlist_signups`, and the app creates its own tables on its first request, so they don't collide. Sharing it means the dashboard sees the app's data with no extra setup, and the launch email list and the app's accounts live side by side.
 
 ## 3. Waitlist export
 
@@ -123,12 +120,9 @@ curl -sI https://www.trysidekick.ca/.well-known/assetlinks.json
 `/dashboard` shows the numbers to check every week: waitlist → accounts, onboarding completion, time to first connection, D1/D7/D30 retention, reply rate and chats reaching 10+ messages. Each tile shows the last full week (Monday to Sunday, Toronto time) against the week before, and a table below has eight weeks of every number. Only real students count: the app's sample profiles and demo account are left out.
 
 1. Set `DASHBOARD_PASSWORD` to a long random value. Open `https://www.trysidekick.ca/dashboard` and enter it (any username). Without the variable, the page doesn't exist.
-2. Connect the app's database, which the dashboard only reads:
-   - if the waitlist **reuses the app's Turso database** (step 2), there's nothing to do;
-   - otherwise set `APP_DATABASE_URL` to the app's `TURSO_DATABASE_URL`, and `APP_DATABASE_AUTH_TOKEN` to a **read-only** token, so the website can never change the app's data: `turso db tokens create <database> --read-only`.
-3. Redeploy, and check `/api/health`: `appDatabase` should say `ok: true`, with how it's connected.
-
-Without the app's database the dashboard still shows the waitlist, with a note at the top.
+2. The app's data: the dashboard reads the waitlist's database, which the app shares from launch (step 2), so there's nothing to set. Until the app has run on it, the dashboard says **No app data yet** and shows the waitlist numbers; the app's tiles fill in by themselves after launch.
+   - Optional: set `APP_DATABASE_URL` to the database's URL and `APP_DATABASE_AUTH_TOKEN` to a **read-only** token for it (`turso db tokens create <database> --read-only`, or the Turso dashboard), so the dashboard can only ever read. Use these too if the app ever runs on a different database.
+3. Redeploy, and check `/api/health`: `appDatabase` says `ok: true` once the app's tables are there, and `no app tables yet` before that.
 
 ### What it can't measure yet
 

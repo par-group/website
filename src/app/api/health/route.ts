@@ -26,12 +26,11 @@ export async function GET() {
     database = { ok: false, detail: e instanceof Error ? e.message : String(e) };
   }
 
-  // The app's database, for the dashboard: how it's connected, and whether its tables can be read.
+  // The app's database, for the dashboard: how it's connected, and whether the app's tables are there yet.
   let appDatabase: { ok: boolean; detail: string };
   try {
     const app = await appDb();
-    if (app) await app.client.execute("SELECT 1 FROM users LIMIT 1");
-    appDatabase = app ? { ok: true, detail: app.via } : { ok: false, detail: "not connected" };
+    appDatabase = { ok: app.ready, detail: app.ready ? app.via : `no app tables yet (${app.via})` };
   } catch (e) {
     appDatabase = { ok: false, detail: e instanceof Error ? e.message : String(e) };
   }

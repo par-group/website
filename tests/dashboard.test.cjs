@@ -120,16 +120,41 @@ describe("the dashboard", () => {
     assert.equal(app.metrics.connectedWithin7Days.at(-1), null);
   });
 
-  test("still shows the waitlist when the app's database isn't connected", async () => {
-    delete process.env.APP_DATABASE_URL;
+  test("says there's no app data yet before the app has run on its database", async () => {
+    const appUrl = process.env.APP_DATABASE_URL;
     try {
-      const { app, waitlist } = await loadDashboard(NOW);
-      assert.deepEqual(app, { ok: false, reason: "not connected" });
+      // Before launch: the shared waitlist database has no app tables yet.
+      delete process.env.APP_DATABASE_URL;
+      let { app, waitlist } = await loadDashboard(NOW);
+      assert.deepEqual(app, { ok: false, reason: "no app data yet" });
       assert.equal(waitlist.total, 3);
       assert.equal(waitlist.withAccount, null);
       assert.equal(waitlist.toAccount, null);
+
+      // APP_DATABASE_URL pointing at a database without them (e.g. the waitlist's, read-only).
+      const empty = `file:${path.join(workspace.dir, "empty.db")}`;
+      createClient({ url: empty }).close();
+      delete globalThis.__sidekickAppDb;
+      process.env.APP_DATABASE_URL = empty;
+      ({ app } = await loadDashboard(NOW));
+      assert.deepEqual(app, { ok: false, reason: "no app data yet" });
     } finally {
-      process.env.APP_DATABASE_URL = `file:${path.join(workspace.dir, "app.db")}`;
+      delete globalThis.__sidekickAppDb;
+      process.env.APP_DATABASE_URL = appUrl;
+    }
+  });
+
+  test("reads the app from the waitlist's database once the app runs on it", async () => {
+    const appUrl = process.env.APP_DATABASE_URL;
+    try {
+      delete process.env.APP_DATABASE_URL;
+      await (await load("@/server/db").db()).executeMultiple(APP_SCHEMA);
+      const { app } = await loadDashboard(NOW);
+      assert.equal(app.ok, true);
+      assert.equal(app.via, "shared with the waitlist");
+      assert.equal(app.accounts, 0);
+    } finally {
+      process.env.APP_DATABASE_URL = appUrl;
     }
   });
 });
