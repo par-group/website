@@ -4,6 +4,8 @@ import crypto from "node:crypto";
 // HTTP Basic auth for the owner-only pages (the waitlist export and the
 // dashboard): the browser asks for a password, and any username is accepted.
 
+export const DASHBOARD_REALM = "Sidekick dashboard";
+
 /** Whether an Authorization header carries `password`, compared in constant time. */
 export function hasPassword(authorization: string | null, password: string): boolean {
   const [scheme, encoded] = (authorization ?? "").split(" ");

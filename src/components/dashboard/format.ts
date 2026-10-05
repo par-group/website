@@ -1,4 +1,4 @@
-import { DAY, TIME_ZONE, type Week } from "@/lib/weeks";
+import { DAY, TIME_ZONE, type Week } from "@/lib/calendar";
 import type { Cell, Duration, Rate } from "@/server/metrics";
 
 const number = new Intl.NumberFormat("en-CA");

@@ -1,4 +1,5 @@
 import { hasPassword, passwordRequired } from "@/server/basic-auth";
+import { csvResponse } from "@/server/csv";
 import { listSignups } from "@/server/waitlist";
 
 /**
@@ -14,26 +15,9 @@ export async function GET(request: Request) {
 
   const rows = await listSignups();
   const iso = (ms: number) => new Date(ms).toISOString();
-  const csv = [
+  return csvResponse(
+    `sidekick-waitlist-${iso(Date.now()).slice(0, 10)}.csv`,
     ["email", "school", "platform", "source", "signed_up_at", "updated_at"],
-    ...rows.map((r) => [r.email, r.school, r.platform, r.source, iso(r.created_at), iso(r.updated_at)]),
-  ]
-    .map((cells) => cells.map(csvCell).join(","))
-    .join("\r\n");
-
-  return new Response(`${csv}\r\n`, {
-    headers: {
-      "Content-Type": "text/csv; charset=utf-8",
-      "Content-Disposition": `attachment; filename="sidekick-waitlist-${iso(Date.now()).slice(0, 10)}.csv"`,
-      "Cache-Control": "no-store",
-      "X-Robots-Tag": "noindex",
-    },
-  });
-}
-
-/** Quotes every cell, and defuses values a spreadsheet would run as a formula (school and source are typed by visitors). */
-function csvCell(value: string | null) {
-  const text = value ?? "";
-  const safe = /^[=+\-@\t\r]/.test(text) ? `'${text}` : text;
-  return `"${safe.replace(/"/g, '""')}"`;
+    rows.map((r) => [r.email, r.school, r.platform, r.source, iso(r.created_at), iso(r.updated_at)]),
+  );
 }

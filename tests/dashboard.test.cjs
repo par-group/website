@@ -8,7 +8,7 @@ const { load, useTempWorkspace } = require("./support/harness.cjs");
 const workspace = useTempWorkspace("dashboard");
 after(() => workspace.cleanup());
 
-const { weekStart, recentWeeks, DAY } = load("@/lib/weeks");
+const { weekStart, recentWeeks, DAY } = load("@/lib/calendar");
 const { addSignup } = load("@/server/waitlist");
 const { loadDashboard } = load("@/server/metrics");
 const { proxy } = load("@/proxy");
@@ -64,7 +64,10 @@ describe("the dashboard", () => {
         ["INSERT INTO users VALUES ('s2', 'seed@example.invalid', 1, 1, ?)", [T0]],
         // A and B become friends 10h after A signed up (9h after B), and chat 10 messages.
         ["INSERT INTO matches VALUES ('ab', 'a', 'b', ?)", [T0 + 10 * HOUR]],
-        ...Array.from({ length: 10 }, (_, i) => ["INSERT INTO messages VALUES (?, 'ab', ?, ?)", [`m${i}`, i % 2 ? "a" : "b", T0 + 10 * HOUR + i * 60_000]]),
+        ...Array.from({ length: 10 }, (_, i) => [
+          "INSERT INTO messages VALUES (?, 'ab', ?, ?)",
+          [`m${i}`, i % 2 ? "a" : "b", T0 + 10 * HOUR + i * 60_000],
+        ]),
         ["INSERT INTO matches VALUES ('ss', 's1', 's2', ?)", [T0]],
         // One of two real comments got a reply; the sample profile's replied comment doesn't count.
         ["INSERT INTO comments VALUES ('k1', 'a', 'b', ?, ?)", [T0 + 3 * DAY, T0 + 3 * DAY + HOUR]],
@@ -161,7 +164,10 @@ describe("the dashboard", () => {
 
 describe("the dashboard password", () => {
   const request = (password) =>
-    new Request("http://localhost/dashboard", password ? { headers: { authorization: `Basic ${Buffer.from(`me:${password}`).toString("base64")}` } } : {});
+    new Request(
+      "http://localhost/dashboard",
+      password ? { headers: { authorization: `Basic ${Buffer.from(`me:${password}`).toString("base64")}` } } : {},
+    );
 
   test("is asked for, and a wrong one is refused", () => {
     process.env.DASHBOARD_PASSWORD = "correct horse";

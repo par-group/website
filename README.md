@@ -42,7 +42,7 @@ No setup is needed locally: waitlist signups go to a SQLite file in `./data`. Co
 | `/terms` | Terms of Use |
 | `/invite/…` | Where invite links land without the app installed. With it installed, they open the app instead ([App links](docs/deployment.md#6-app-links)) |
 | `/.well-known/…` | The files that let invite links open the app: `apple-app-site-association` (iOS) and `assetlinks.json` (Android) |
-| `/dashboard` | Password-protected weekly metrics: waitlist, onboarding, connections, retention, conversations ([details](docs/deployment.md#7-metrics-dashboard)) |
+| `/dashboard` | Password-protected owner's view: weekly metrics, the full waitlist (search, filters, CSV) and the setup status ([details](docs/deployment.md#7-metrics-dashboard)) |
 | `/api/waitlist/export` | Password-protected CSV of every signup |
 | `/api/health` | Which settings are configured, and whether the database is reachable |
 | `/app-demo/…` | The app, proxied from its own Vercel project when `APP_DEMO_ORIGIN` is set |
@@ -51,9 +51,11 @@ No setup is needed locally: waitlist signups go to a SQLite file in `./data`. Co
 
 ```
 src/
-  app/                 Pages, route handlers, share image, icons, sitemap, robots
+  app/                 Routes: (site)/ has the public pages and their header and footer,
+                       dashboard/ the owner's dashboard; plus route handlers, icons, sitemap
   components/
     brand/             Logo and app icon (copied from the app)
+    dashboard/         The dashboard's tiles, charts, tables and navigation
     mockups/           Phone frame and static recreations of the app's screens
     site/              Header, footer, section headings, FAQ list, App Store badge
     ui/                Icons and tag pills (the app's, plus a few for the site)

@@ -117,7 +117,11 @@ curl -sI https://www.trysidekick.ca/.well-known/assetlinks.json
 
 ## 7. Metrics dashboard
 
-`/dashboard` shows the numbers to check every week: waitlist → accounts, onboarding completion, time to first connection, D1/D7/D30 retention, reply rate and chats reaching 10+ messages. Each tile shows the last full week (Monday to Sunday, Toronto time) against the week before, and a table below has eight weeks of every number. Only real students count: the app's sample profiles and demo account are left out.
+`/dashboard` is the owner's view of everything the site and app record, in three tabs:
+
+- **Overview**: the numbers to check every week: waitlist → accounts, onboarding completion, time to first connection, D1/D7/D30 retention, reply rate and chats reaching 10+ messages. Each tile shows the last full week (Monday to Sunday, Toronto time) against the week before, and a table below has eight weeks of every number. Only real students count: the app's sample profiles and demo account are left out.
+- **Waitlist**: everyone who joined. Totals, signups per day (30 or 90 days), where people came from, where they study and which phone they use, then the full list: search by email, school or source, filter by source, school and phone, and download everyone, or just the filtered list, as a CSV. Each breakdown links to the people behind it. Once the app has data, the list shows who has an account.
+- **Setup**: whether each part is connected and working (the databases, app links, the App Store listing, and so on), what to do about anything that isn't, and which commit is running.
 
 1. Set `DASHBOARD_PASSWORD` to a long random value. Open `https://www.trysidekick.ca/dashboard` and enter it (any username). Without the variable, the page doesn't exist.
 2. The app's data: the dashboard reads the waitlist's database, which the app shares from launch (step 2), so there's nothing to set. Until the app has run on it, the dashboard says **No app data yet** and shows the waitlist numbers; the app's tiles fill in by themselves after launch.

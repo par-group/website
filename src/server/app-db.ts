@@ -23,3 +23,10 @@ export async function appDb(): Promise<AppDatabase> {
   const { rows } = await client.execute("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'users'");
   return { client, via: url ? "APP_DATABASE_URL" : "shared with the waitlist", ready: rows.length > 0 };
 }
+
+/** Real students' account emails (normalized), to match against the waitlist; null before the app has data. */
+export async function appAccountEmails(database: AppDatabase): Promise<Set<string> | null> {
+  if (!database.ready) return null;
+  const { rows } = await database.client.execute("SELECT lower(trim(email)) AS email FROM users WHERE is_sandbox = 0");
+  return new Set(rows.map((r) => String(r.email)));
+}

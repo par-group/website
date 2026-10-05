@@ -1,4 +1,4 @@
-import type { Week } from "@/lib/weeks";
+import type { Week } from "@/lib/calendar";
 
 export type TableCell = { value: string; detail?: string } | null;
 export type TableRow = { group: string } | { label: string; cells: TableCell[] };

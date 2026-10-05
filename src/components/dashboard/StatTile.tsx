@@ -51,3 +51,16 @@ export function Figure({
 export function NoData({ children }: { children: React.ReactNode }) {
   return <p className="rounded-2xl bg-bg px-4 py-3 text-sm text-ink-soft">{children}</p>;
 }
+
+/** A single headline number in a row of them. */
+export function Kpi({ label, value, caption, change }: { label: string; value: string; caption?: React.ReactNode; change?: Change | null }) {
+  const tone = change?.good === true ? "text-green" : change?.good === false ? "text-danger" : "text-ink-soft";
+  return (
+    <div className="card p-4 sm:p-5">
+      <p className="text-sm font-semibold text-ink-soft">{label}</p>
+      <p className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">{value}</p>
+      {caption && <p className="mt-1 text-sm text-ink-soft">{caption}</p>}
+      {change && <p className={`mt-1 text-sm font-semibold ${tone}`}>{change.text}</p>}
+    </div>
+  );
+}

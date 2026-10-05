@@ -1,7 +1,7 @@
 import "server-only";
 import type { Client, InArgs } from "@libsql/client";
-import { DAY, recentWeeks, weekIndex, type Week } from "@/lib/weeks";
-import { appDb } from "@/server/app-db";
+import { DAY, recentWeeks, weekIndex, type Week } from "@/lib/calendar";
+import { appAccountEmails, appDb } from "@/server/app-db";
 import { all } from "@/server/db";
 
 // The weekly numbers on /dashboard. Every metric is by week, Monday to Sunday on
@@ -121,7 +121,9 @@ async function appMetrics(client: Client, weeks: Week[], now: number): Promise<A
     const waits = cohort.filter((u) => u.first_match_at !== null).map((u) => u.first_match_at! - u.created_at);
     timeToFirstConnection.push(waits.length ? { ms: median(waits), n: waits.length } : null);
     const weekOld = cohort.filter((u) => u.created_at + 7 * DAY <= now);
-    connectedWithin7Days.push(rate(weekOld.filter((u) => u.first_match_at !== null && u.first_match_at - u.created_at <= 7 * DAY).length, weekOld.length));
+    connectedWithin7Days.push(
+      rate(weekOld.filter((u) => u.first_match_at !== null && u.first_match_at - u.created_at <= 7 * DAY).length, weekOld.length),
+    );
   }
 
   // Active on day N after signing up (24-hour windows from the signup time):
@@ -198,9 +200,9 @@ export async function loadDashboard(now = Date.now()): Promise<Dashboard> {
     if (!database.ready) {
       app = { ok: false, reason: "no app data yet" };
     } else {
-      const emails = await query<{ email: string }>(database.client, "SELECT lower(trim(email)) AS email FROM users WHERE is_sandbox = 0");
-      app = { ok: true, via: database.via, accounts: emails.length, metrics: await appMetrics(database.client, weeks, now) };
-      appEmails = new Set(emails.map((e) => e.email));
+      const emails = (await appAccountEmails(database))!;
+      app = { ok: true, via: database.via, accounts: emails.size, metrics: await appMetrics(database.client, weeks, now) };
+      appEmails = emails;
     }
   } catch (e) {
     app = { ok: false, reason: e instanceof Error ? e.message : String(e) };
