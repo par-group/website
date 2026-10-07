@@ -147,13 +147,13 @@ The website sends from the same mailbox as the app, `hello@trysidekick.ca` on Zo
 
 | Variable | Value |
 | --- | --- |
-| `SMTP_HOST` | `smtppro.zoho.com`, or your Zoho region's: `smtppro.` plus the domain you log in to Zoho Mail at |
+| `SMTP_HOST` | `smtppro.zohocloud.ca`: our mailbox is in Zoho's Canadian region (`mail.zohocloud.ca`). Other regions: `smtppro.` plus the domain you log in to Zoho Mail at |
 | `SMTP_PORT` | `465` |
 | `SMTP_USER` | `hello@trysidekick.ca` |
-| `SMTP_PASS` | a Zoho **app password**: Zoho account → **Security** → **App Passwords** → **Generate New Password** |
+| `SMTP_PASS` | a Zoho **app password**: `accounts.zohocloud.ca` → **Security** → **App Passwords** → **Generate New Password** |
 | `EMAIL_FROM` | optional: `Sidekick <hello@trysidekick.ca>` |
 
-Redeploy, then check the dashboard's Setup tab: **Confirmation emails** says Working. Join with a York inbox you can read to see the email; the Waitlist tab marks each person the confirmation was sent to. Zoho's free plan can't send from apps; Resend works too (`RESEND_API_KEY` and `EMAIL_FROM`, with the domain verified there).
+Redeploy, then on the dashboard's Setup tab press **Test connection** next to **Confirmation emails**: it signs in to Zoho without sending anything. "535 Authentication Failed" means the wrong region in `SMTP_HOST` or a password that isn't an app password. Join with a York inbox you can read to see the email; the Waitlist tab marks each person the confirmation was sent to. Zoho's free plan can't send from apps; Resend works too (`RESEND_API_KEY` and `EMAIL_FROM`, with the domain verified there).
 
 Only a first signup is emailed, so the form can't be used to flood someone's inbox, and the email is sent just after the response, so joining stays instant. A failed send is logged in Vercel (**Logs**, search "confirmation email failed") and the signup still counts. Without these settings nobody is emailed and everything else works.
 
