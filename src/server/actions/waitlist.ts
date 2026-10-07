@@ -11,7 +11,8 @@ import { sendWaitlistConfirmation } from "@/server/waitlist-email";
 // Server Actions are public endpoints: every argument is re-checked here,
 // whatever the form already validated.
 
-export type JoinResult = { ok: true; id: string; school: string | null } | { ok: false; error: string };
+/** `alreadyJoined`: the email was on the list before, so the page says so (and nothing is emailed). */
+export type JoinResult = { ok: true; id: string; school: string | null; alreadyJoined: boolean } | { ok: false; error: string };
 export type DetailsResult = { ok: true } | { ok: false; error: string };
 
 const SAVE_FAILED = "We couldn’t save that just now. Please try again in a minute.";
@@ -25,7 +26,7 @@ export async function joinWaitlist(input: { email?: unknown; source?: unknown; w
   // Honeypot: a field people never see. Bots that fill it get a normal-looking
   // success, and nothing is stored.
   if (typeof input.website === "string" && input.website.trim()) {
-    return { ok: true, id: crypto.randomUUID(), school: schoolForEmail(email) };
+    return { ok: true, id: crypto.randomUUID(), school: schoolForEmail(email), alreadyJoined: false };
   }
 
   try {
@@ -33,7 +34,7 @@ export async function joinWaitlist(input: { email?: unknown; source?: unknown; w
     // Only a new signup is emailed, so the form can't be used to flood someone's inbox.
     // It's sent after the response, so joining stays instant.
     if (created && removalToken && emailProvider()) after(() => sendWaitlistConfirmation({ id, email }, removalToken));
-    return { ok: true, id, school: schoolForEmail(email) };
+    return { ok: true, id, school: schoolForEmail(email), alreadyJoined: !created };
   } catch (e) {
     console.error("waitlist: signup failed", e);
     return { ok: false, error: SAVE_FAILED };

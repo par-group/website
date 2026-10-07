@@ -18,7 +18,8 @@ const WAITLIST: Faq[] = [
     answer: (
       <p>
         After you join, the page says <strong>You’re on the list</strong>, and we email a confirmation to your York address. It can take a few
-        minutes, so check your spam folder too. Joining again with the same email is fine: you won’t be added twice.
+        minutes, so check your spam folder too. If you join again with the same email, the page tells you you’re already on the list, and you
+        won’t be added twice.
       </p>
     ),
   },

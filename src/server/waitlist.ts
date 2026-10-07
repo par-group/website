@@ -24,10 +24,11 @@ const TOKEN = /^[A-Za-z0-9_-]{32}$/;
 const hashToken = (token: string) => crypto.createHash("sha256").update(token).digest("hex");
 
 /**
- * Adds an email to the waitlist, or finds it if it's already there. Signing up
- * twice is not an error, so the form never reveals who is on the list. The first
- * signup's source is kept. Returns the row id, which the follow-up question uses,
- * and for a new signup the removal token for its confirmation email.
+ * Adds an email to the waitlist, or finds it if it's already there: signing up
+ * twice isn't an error, and the page tells the person they're already on the list.
+ * The first signup's source is kept. Returns the row id, which the follow-up
+ * question uses, whether it's new, and for a new signup the removal token for its
+ * confirmation email.
  */
 export async function addSignup(
   email: string,

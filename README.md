@@ -68,7 +68,7 @@ docs/                  Deployment, the waitlist export, the /app-demo setup and 
 
 ## How the waitlist works
 
-1. A visitor enters their York email. Only `@my.yorku.ca` addresses are accepted for now (`isStudentEmail` in `src/lib/waitlist.ts`), checked in the form and again on the server. `joinWaitlist` (`src/server/actions/waitlist.ts`) stores it once, however many times it's submitted. The response is the same either way, so the form never reveals who is on the list.
+1. A visitor enters their York email. Only `@my.yorku.ca` addresses are accepted for now (`isStudentEmail` in `src/lib/waitlist.ts`), checked in the form and again on the server. `joinWaitlist` (`src/server/actions/waitlist.ts`) stores it once, however many times it's submitted. Submitting an address that's already on the list says so, and suggests sharing the waitlist with friends instead.
 2. A first signup gets a confirmation email (`src/server/waitlist-email.ts`), sent just after the response. Its "Didn't join? Remove it from the waitlist" link carries a random token (only its hash is stored) and opens `/waitlist/remove/…`, which asks before deleting the signup, so mail scanners that open links can't remove anyone.
 3. One optional question follows: which phone they use.
 4. The confirmation on the page offers a share link (`?ref=share`).

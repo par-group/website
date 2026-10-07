@@ -74,10 +74,12 @@ describe("joining the waitlist", () => {
     assert.equal(row.source, "poster-vari-hall");
   });
 
-  test("signing up twice is fine and keeps the first source", async () => {
+  test("signing up twice is fine: it says so, and keeps the first source", async () => {
     const first = await joinWaitlist({ email: "jordan@my.yorku.ca", source: "instagram" });
     const second = await joinWaitlist({ email: "JORDAN@my.yorku.ca", source: "tiktok" });
+    assert.equal(first.alreadyJoined, false);
     assert.equal(second.ok, true);
+    assert.equal(second.alreadyJoined, true, "the page says this email had already signed up");
     assert.equal(second.id, first.id);
     const rows = (await listSignups()).filter((s) => s.email === "jordan@my.yorku.ca");
     assert.equal(rows.length, 1);
@@ -106,6 +108,7 @@ describe("joining the waitlist", () => {
   test("the honeypot looks like a success but stores nothing", async () => {
     const res = await joinWaitlist({ email: "bot@my.yorku.ca", website: "https://spam.example" });
     assert.equal(res.ok, true);
+    assert.equal(res.alreadyJoined, false);
     assert.equal(await find("bot@my.yorku.ca"), undefined);
     // Its fake id is accepted by the follow-up step and changes nothing.
     assert.deepEqual(await saveWaitlistDetails({ id: res.id, platform: "ios" }), { ok: true });

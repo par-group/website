@@ -7,8 +7,9 @@ import { SITE } from "@/lib/site";
 import { joinWaitlist, saveWaitlistDetails } from "@/server/actions/waitlist";
 
 // One signup per visit, shared by every form on the page: the form that was
-// used walks through the optional question, the others just confirm.
-type Signup = { id: string; email: string; school: string | null; owner: string; step: "details" | "done" };
+// used walks through the optional question (or says the email was already on
+// the list), the others just confirm.
+type Signup = { id: string; email: string; school: string | null; owner: string; step: "details" | "done" | "already" };
 
 let signup: Signup | null = null;
 const listeners = new Set<() => void>();
@@ -73,7 +74,9 @@ export function WaitlistForm({
       </p>
     );
   }
-  return current.step === "details" ? <DetailsStep signup={current} /> : <DoneStep signup={current} />;
+  if (current.step === "details") return <DetailsStep signup={current} />;
+  if (current.step === "already") return <AlreadyStep signup={current} />;
+  return <DoneStep signup={current} />;
 }
 
 function EmailStep({ owner, tone, buttonLabel }: { owner: string; tone: "light" | "teal"; buttonLabel: string }) {
@@ -95,7 +98,7 @@ function EmailStep({ owner, tone, buttonLabel }: { owner: string; tone: "light" 
     startTransition(async () => {
       try {
         const res = await joinWaitlist({ email, source: currentSource(), website: honeypot.current?.value });
-        if (res.ok) store.set({ id: res.id, email: normalizeEmail(email), school: res.school, owner, step: "details" });
+        if (res.ok) store.set({ id: res.id, email: normalizeEmail(email), school: res.school, owner, step: res.alreadyJoined ? "already" : "details" });
         else setError(res.error);
       } catch {
         setError("Couldn’t connect. Check your connection and try again.");
@@ -223,9 +226,52 @@ function Choice({ name, checked, onChange, children }: { name: string; checked: 
 
 function DoneStep({ signup }: { signup: Signup }) {
   const heading = useRef<HTMLHeadingElement>(null);
-  const [copied, setCopied] = useState(false);
 
   useEffect(() => heading.current?.focus(), []);
+
+  return (
+    <div className="card w-full max-w-lg p-6 text-left text-ink" role="status">
+      <h3 ref={heading} tabIndex={-1} className="flex items-center gap-2 font-serif text-2xl font-semibold outline-none">
+        <span className="grid size-8 place-items-center rounded-full bg-accent text-white">
+          <CheckIcon className="size-4" />
+        </span>
+        You’re all set.
+      </h3>
+      <p className="mt-2 text-ink-soft">
+        We’ll email <strong className="text-ink [overflow-wrap:anywhere]">{signup.email}</strong> as soon as Sidekick is ready. Sidekick is better when your friends
+        are on it too.
+      </p>
+      <ShareButton label="Share the waitlist" className="btn-secondary mt-5" />
+    </div>
+  );
+}
+
+/** For an email that was already on the list: nothing new to save, so the next step is bringing friends. */
+function AlreadyStep({ signup }: { signup: Signup }) {
+  const heading = useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => heading.current?.focus(), []);
+
+  return (
+    <div className="card w-full max-w-lg p-6 text-left text-ink" role="status">
+      <h3 ref={heading} tabIndex={-1} className="flex items-center gap-2 font-serif text-2xl font-semibold outline-none">
+        <span className="grid size-8 place-items-center rounded-full bg-accent text-white">
+          <CheckIcon className="size-4" />
+        </span>
+        You’re already on the list!
+      </h3>
+      <p className="mt-2 text-ink-soft">
+        <strong className="text-ink [overflow-wrap:anywhere]">{signup.email}</strong> has already signed up. Share the waitlist with your friends so you can
+        enjoy Sidekick together as soon as it launches.
+      </p>
+      <ShareButton label="Share with friends" className="btn-primary mt-5" />
+    </div>
+  );
+}
+
+/** Shares the waitlist link (?ref=share): the phone's share sheet where there is one, else copies the link. */
+function ShareButton({ label, className }: { label: string; className: string }) {
+  const [copied, setCopied] = useState(false);
 
   const share = async () => {
     const url = `${SITE.url}/?ref=share`;
@@ -243,20 +289,8 @@ function DoneStep({ signup }: { signup: Signup }) {
   };
 
   return (
-    <div className="card w-full max-w-lg p-6 text-left text-ink" role="status">
-      <h3 ref={heading} tabIndex={-1} className="flex items-center gap-2 font-serif text-2xl font-semibold outline-none">
-        <span className="grid size-8 place-items-center rounded-full bg-accent text-white">
-          <CheckIcon className="size-4" />
-        </span>
-        You’re all set.
-      </h3>
-      <p className="mt-2 text-ink-soft">
-        We’ll email <strong className="text-ink [overflow-wrap:anywhere]">{signup.email}</strong> as soon as Sidekick is ready. Sidekick is better when your friends
-        are on it too.
-      </p>
-      <button type="button" onClick={share} className="btn-secondary mt-5">
-        <ShareIcon className="size-4" /> {copied ? "Link copied" : "Share the waitlist"}
-      </button>
-    </div>
+    <button type="button" onClick={share} className={className}>
+      <ShareIcon className="size-4" /> {copied ? "Link copied" : label}
+    </button>
   );
 }
