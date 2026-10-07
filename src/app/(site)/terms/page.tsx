@@ -32,8 +32,9 @@ export default function TermsPage() {
 
       <h2>The website and waitlist</h2>
       <p>
-        Anyone can join the waitlist on {SITE.displayUrl}. Joining doesn’t create a Sidekick account or guarantee access. It means we’ll email you
-        about Sidekick’s launch, as described in our <Link href="/privacy">Privacy Policy</Link>. You can leave the waitlist at any time.
+        York students can join the waitlist on {SITE.displayUrl} with their @my.yorku.ca email. Joining doesn’t create a Sidekick account or
+        guarantee access. It means we’ll confirm your signup by email and tell you about Sidekick’s launch, as described in our{" "}
+        <Link href="/privacy">Privacy Policy</Link>. You can leave the waitlist at any time.
       </p>
 
       <h2>Friends, not dates</h2>

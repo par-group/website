@@ -2,6 +2,7 @@ import "server-only";
 import { appDb } from "@/server/app-db";
 import { androidApp, appleAppIds } from "@/server/app-links";
 import { db, IS_HOSTED_DB } from "@/server/db";
+import { emailProvider } from "@/server/mailer";
 
 // The deployment's state: which settings are present (never their values) and
 // whether the databases answer. /api/health reports it publicly; the dashboard's
@@ -26,6 +27,7 @@ export async function systemStatus() {
     iosAppLinks: appleAppIds().length > 0,
     androidAppLinks: !!androidApp(),
     dashboard: !!process.env.DASHBOARD_PASSWORD,
+    confirmationEmails: emailProvider() ?? false,
     onVercel: !!process.env.VERCEL,
   };
   const [database, appDatabase] = await Promise.all([

@@ -3,6 +3,7 @@ import { PageHeader } from "@/components/dashboard/PageHeader";
 import { TIME_ZONE } from "@/lib/calendar";
 import { SITE } from "@/lib/site";
 import { requireDashboardAccess } from "@/server/dashboard-auth";
+import { senderAddress } from "@/server/mailer";
 import { deployment, systemStatus } from "@/server/status";
 
 export const metadata: Metadata = { title: "Setup" };
@@ -39,6 +40,18 @@ export default async function SetupPage() {
           state: "problem",
           detail: database.detail,
           next: "Signups can’t be saved. Check TURSO_DATABASE_URL and TURSO_AUTH_TOKEN in Vercel (deployment guide, step 2).",
+        },
+    configured.confirmationEmails
+      ? {
+          name: "Confirmation emails",
+          state: "ok",
+          detail: `New signups get a confirmation from ${senderAddress()} (${configured.confirmationEmails === "smtp" ? "SMTP" : "Resend"}).`,
+        }
+      : {
+          name: "Confirmation emails",
+          state: "waiting",
+          detail: "Signups are saved, but no confirmation email is sent.",
+          next: "Set SMTP_HOST, SMTP_USER and SMTP_PASS in Vercel (the app’s mailbox settings) and redeploy (deployment guide, step 8).",
         },
     appDatabase.ok
       ? { name: "App data", state: "ok", detail: `Reading the app’s tables (${appDatabase.detail}).` }

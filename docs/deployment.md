@@ -139,6 +139,24 @@ Some numbers need data the app doesn't record. The tiles say so instead of guess
 | Reports per 1,000 users | Not tracked: reports arrive by email | In-app reporting ([launch checklist](https://github.com/parsasalama6t/sidekick/blob/main/app-demo/docs/launch-checklist.md)) |
 | D1 / D7 / D30 retention | Counts a day if someone swiped, commented, replied or messaged | The app recording each day someone opens it |
 
+## 8. Confirmation emails
+
+The waitlist accepts `@my.yorku.ca` addresses only, and everyone who joins gets an email confirming it. At the bottom, "Didn't join? Remove it from the waitlist" opens a page that asks first, then deletes the signup, for when someone else typed the address. Opening the link alone never removes anything, because mail scanners open links.
+
+The website sends from the same mailbox as the app, `hello@trysidekick.ca` on Zoho Mail, with the same settings (the app's `docs/email.md` explains each). In this project's **Settings → Environment Variables**, for Production:
+
+| Variable | Value |
+| --- | --- |
+| `SMTP_HOST` | `smtppro.zoho.com`, or your Zoho region's: `smtppro.` plus the domain you log in to Zoho Mail at |
+| `SMTP_PORT` | `465` |
+| `SMTP_USER` | `hello@trysidekick.ca` |
+| `SMTP_PASS` | a Zoho **app password**: Zoho account → **Security** → **App Passwords** → **Generate New Password** |
+| `EMAIL_FROM` | optional: `Sidekick <hello@trysidekick.ca>` |
+
+Redeploy, then check the dashboard's Setup tab: **Confirmation emails** says Working. Join with a York inbox you can read to see the email; the Waitlist tab marks each person the confirmation was sent to. Zoho's free plan can't send from apps; Resend works too (`RESEND_API_KEY` and `EMAIL_FROM`, with the domain verified there).
+
+Only a first signup is emailed, so the form can't be used to flood someone's inbox, and the email is sent just after the response, so joining stays instant. A failed send is logged in Vercel (**Logs**, search "confirmation email failed") and the signup still counts. Without these settings nobody is emailed and everything else works.
+
 ## Launch day
 
 - Set `APP_STORE_ID` in `src/lib/site.ts` to the listing's numeric ID. The "Coming soon" badges turn into links, and iPhone visitors see Safari's Smart App Banner. The invite page switches from the waitlist to the App Store.

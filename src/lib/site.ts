@@ -34,4 +34,4 @@ export const SITE = {
 export const PUBLIC_PAGES = ["/", "/join", "/safety", "/support", "/privacy", "/terms"] as const;
 
 /** Date shown on the Privacy Policy and Terms. Update it whenever either changes. */
-export const LEGAL_LAST_UPDATED = "September 29, 2026";
+export const LEGAL_LAST_UPDATED = "October 7, 2026";

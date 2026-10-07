@@ -1,8 +1,12 @@
 "use server";
 
 import crypto from "node:crypto";
-import { cleanPlatform, cleanSchool, cleanSource, isValidEmail, normalizeEmail, schoolForEmail } from "@/lib/waitlist";
-import { addSignup, saveSignupDetails } from "@/server/waitlist";
+import { redirect } from "next/navigation";
+import { after } from "next/server";
+import { cleanPlatform, cleanSchool, cleanSource, isStudentEmail, isValidEmail, normalizeEmail, schoolForEmail, STUDENTS_ONLY } from "@/lib/waitlist";
+import { emailProvider } from "@/server/mailer";
+import { addSignup, removeSignupByToken, saveSignupDetails } from "@/server/waitlist";
+import { sendWaitlistConfirmation } from "@/server/waitlist-email";
 
 // Server Actions are public endpoints: every argument is re-checked here,
 // whatever the form already validated.
@@ -16,6 +20,7 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 export async function joinWaitlist(input: { email?: unknown; source?: unknown; website?: unknown }): Promise<JoinResult> {
   const email = typeof input?.email === "string" ? normalizeEmail(input.email) : "";
   if (!isValidEmail(email)) return { ok: false, error: "Enter a valid email address, like yourname@my.yorku.ca." };
+  if (!isStudentEmail(email)) return { ok: false, error: STUDENTS_ONLY };
 
   // Honeypot: a field people never see. Bots that fill it get a normal-looking
   // success, and nothing is stored.
@@ -24,7 +29,10 @@ export async function joinWaitlist(input: { email?: unknown; source?: unknown; w
   }
 
   try {
-    const id = await addSignup(email, cleanSource(input.source));
+    const { id, created, removalToken } = await addSignup(email, cleanSource(input.source));
+    // Only a new signup is emailed, so the form can't be used to flood someone's inbox.
+    // It's sent after the response, so joining stays instant.
+    if (created && removalToken && emailProvider()) after(() => sendWaitlistConfirmation({ id, email }, removalToken));
     return { ok: true, id, school: schoolForEmail(email) };
   } catch (e) {
     console.error("waitlist: signup failed", e);
@@ -47,4 +55,15 @@ export async function saveWaitlistDetails(input: { id?: unknown; school?: unknow
     console.error("waitlist: saving details failed", e);
     return { ok: false, error: SAVE_FAILED };
   }
+}
+
+/**
+ * "Not you? Remove it": the button on the page the confirmation email links to.
+ * Opening the link never deletes anything (mail scanners open links); this does.
+ * A link that's already been used ends up on the same "removed" page.
+ */
+export async function removeFromWaitlist(formData: FormData): Promise<never> {
+  const token = formData.get("token");
+  await removeSignupByToken(typeof token === "string" ? token : "");
+  redirect("/waitlist/removed");
 }

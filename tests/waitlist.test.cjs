@@ -23,6 +23,19 @@ describe("input rules", () => {
     }
   });
 
+  test("only @my.yorku.ca addresses are student emails", () => {
+    assert.ok(rules.isStudentEmail("maya@my.yorku.ca"));
+    for (const email of ["maya@gmail.com", "prof@yorku.ca", "maya@x.my.yorku.ca", "maya@my.yorku.ca.evil.com", "my.yorku.ca", "@my.yorku.ca"]) {
+      assert.equal(rules.isStudentEmail(email), false, email);
+    }
+  });
+
+  test("masked emails show just enough to recognize them", () => {
+    assert.equal(rules.maskEmail("parsasal@my.yorku.ca"), "pa•••@my.yorku.ca");
+    assert.equal(rules.maskEmail("ab@my.yorku.ca"), "a•••@my.yorku.ca");
+    assert.equal(rules.maskEmail("a@my.yorku.ca"), "•••@my.yorku.ca");
+  });
+
   test("York addresses imply the school", () => {
     assert.equal(rules.schoolForEmail("maya@my.yorku.ca"), rules.YORK);
     assert.equal(rules.schoolForEmail("prof@yorku.ca"), rules.YORK);
@@ -62,11 +75,11 @@ describe("joining the waitlist", () => {
   });
 
   test("signing up twice is fine and keeps the first source", async () => {
-    const first = await joinWaitlist({ email: "jordan@gmail.com", source: "instagram" });
-    const second = await joinWaitlist({ email: "JORDAN@gmail.com", source: "tiktok" });
+    const first = await joinWaitlist({ email: "jordan@my.yorku.ca", source: "instagram" });
+    const second = await joinWaitlist({ email: "JORDAN@my.yorku.ca", source: "tiktok" });
     assert.equal(second.ok, true);
     assert.equal(second.id, first.id);
-    const rows = (await listSignups()).filter((s) => s.email === "jordan@gmail.com");
+    const rows = (await listSignups()).filter((s) => s.email === "jordan@my.yorku.ca");
     assert.equal(rows.length, 1);
     assert.equal(rows[0].source, "instagram");
   });
@@ -81,21 +94,30 @@ describe("joining the waitlist", () => {
     assert.equal((await listSignups()).length, before);
   });
 
+  test("only takes York student emails", async () => {
+    const before = (await listSignups()).length;
+    for (const email of ["sam@gmail.com", "prof@yorku.ca", "a@b.my.yorku.ca", "a@my.yorku.ca.example.com", "a@myyorku.ca"]) {
+      const res = await joinWaitlist({ email });
+      assert.deepEqual(res, { ok: false, error: rules.STUDENTS_ONLY }, email);
+    }
+    assert.equal((await listSignups()).length, before);
+  });
+
   test("the honeypot looks like a success but stores nothing", async () => {
-    const res = await joinWaitlist({ email: "bot@spam.example", website: "https://spam.example" });
+    const res = await joinWaitlist({ email: "bot@my.yorku.ca", website: "https://spam.example" });
     assert.equal(res.ok, true);
-    assert.equal(await find("bot@spam.example"), undefined);
+    assert.equal(await find("bot@my.yorku.ca"), undefined);
     // Its fake id is accepted by the follow-up step and changes nothing.
     assert.deepEqual(await saveWaitlistDetails({ id: res.id, platform: "ios" }), { ok: true });
   });
 });
 
 describe("the follow-up questions", () => {
-  test("save the school and phone", async () => {
-    const { id } = await joinWaitlist({ email: "priya@utoronto.ca" });
-    assert.deepEqual(await saveWaitlistDetails({ id, school: "  University of Toronto ", platform: "android" }), { ok: true });
-    const row = await find("priya@utoronto.ca");
-    assert.equal(row.school, "University of Toronto");
+  test("save the phone, and still accept a school", async () => {
+    const { id } = await joinWaitlist({ email: "priya@my.yorku.ca" });
+    assert.deepEqual(await saveWaitlistDetails({ id, school: "  York   University ", platform: "android" }), { ok: true });
+    const row = await find("priya@my.yorku.ca");
+    assert.equal(row.school, rules.YORK);
     assert.equal(row.platform, "android");
   });
 
@@ -135,7 +157,7 @@ describe("CSV export", () => {
 
   test("returns every signup, with formulas defused", async () => {
     process.env.WAITLIST_EXPORT_PASSWORD = "correct horse";
-    const { id } = await joinWaitlist({ email: "sam@gmail.com" });
+    const { id } = await joinWaitlist({ email: "sam@my.yorku.ca" });
     await saveWaitlistDetails({ id, school: '=HYPERLINK("http://evil.example")' });
 
     const res = await exportRoute.GET(request("correct horse"));
@@ -143,9 +165,9 @@ describe("CSV export", () => {
     assert.match(res.headers.get("content-type"), /^text\/csv/);
     assert.equal(res.headers.get("cache-control"), "no-store");
     const lines = (await res.text()).trim().split("\r\n");
-    assert.equal(lines[0], '"email","school","platform","source","signed_up_at","updated_at"');
+    assert.equal(lines[0], '"email","school","platform","source","signed_up_at","updated_at","confirmation_sent_at"');
     assert.equal(lines.length, (await listSignups()).length + 1);
-    const sam = lines.find((l) => l.startsWith('"sam@gmail.com"'));
+    const sam = lines.find((l) => l.startsWith('"sam@my.yorku.ca"'));
     assert.ok(sam.includes(`"'=HYPERLINK(""http://evil.example"")"`), sam);
   });
 });

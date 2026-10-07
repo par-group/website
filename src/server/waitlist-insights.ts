@@ -8,7 +8,7 @@ import type { WaitlistSignup } from "@/server/waitlist";
 // What the dashboard's Waitlist page reads: the signups themselves (searched,
 // filtered and paged in SQL), and the totals and breakdowns above them.
 
-const COLUMNS = "id, email, school, platform, source, created_at, updated_at";
+const COLUMNS = "id, email, school, platform, source, confirmation_sent_at, created_at, updated_at";
 
 /** A LIKE pattern matching `text` literally, anywhere (with ESCAPE '\'). */
 const containing = (text: string) => `%${text.replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
@@ -69,7 +69,8 @@ export type WaitlistSummary = {
   /** Signups in the 7 days up to now, and the 7 before that. */
   last7: number;
   previous7: number;
-  york: number;
+  /** Signups whose confirmation email was accepted for delivery. */
+  emailed: number;
   /** Signups that answered the phone question, and how many of them said iPhone. */
   answeredPhone: number;
   iphone: number;
@@ -95,18 +96,18 @@ export async function waitlistSummary(days: number, now = Date.now()): Promise<W
     total: number;
     last7: number | null;
     previous7: number | null;
-    york: number | null;
+    emailed: number | null;
     answered: number | null;
     iphone: number | null;
   }>(
     `SELECT COUNT(*) AS total,
        SUM(created_at > ?) AS last7,
        SUM(created_at > ? AND created_at <= ?) AS previous7,
-       SUM(school = ?) AS york,
+       SUM(confirmation_sent_at IS NOT NULL) AS emailed,
        SUM(platform IS NOT NULL) AS answered,
        SUM(platform = 'ios') AS iphone
      FROM waitlist_signups`,
-    [now - 7 * DAY, now - 14 * DAY, now - 7 * DAY, YORK],
+    [now - 7 * DAY, now - 14 * DAY, now - 7 * DAY],
   );
 
   const window = recentDays(now, days);
@@ -128,7 +129,7 @@ export async function waitlistSummary(days: number, now = Date.now()): Promise<W
     total: Number(totals.total),
     last7: Number(totals.last7 ?? 0),
     previous7: Number(totals.previous7 ?? 0),
-    york: Number(totals.york ?? 0),
+    emailed: Number(totals.emailed ?? 0),
     answeredPhone: Number(totals.answered ?? 0),
     iphone: Number(totals.iphone ?? 0),
     daily,

@@ -121,7 +121,7 @@ const FAQ: Faq[] = [
     answer: (
       <p>
         York University students who are 18 or older. You sign in with your <strong>@my.yorku.ca</strong> email, so everyone you meet is a verified
-        York student. Anyone can join the waitlist.
+        York student. The waitlist is for York students too: join with your York email.
       </p>
     ),
   },
@@ -129,7 +129,8 @@ const FAQ: Faq[] = [
     question: "I’m not at York. Can I still sign up?",
     answer: (
       <p>
-        Yes, please do. Join the waitlist and tell us where you study. We’ll open new campuses where the most students are waiting.
+        Not yet. Sidekick is starting with York, so the waitlist takes <strong>@my.yorku.ca</strong> addresses only for now. More campuses come
+        after launch: tell us where you study at <a href={`mailto:${SITE.supportEmail}`}>{SITE.supportEmail}</a> and we’ll keep you posted.
       </p>
     ),
   },
@@ -160,8 +161,9 @@ const FAQ: Faq[] = [
     question: "What do you do with my email?",
     answer: (
       <p>
-        We use it only to tell you about Sidekick’s launch. We never sell it or share it for advertising. You can unsubscribe from any email, or ask
-        us to remove you at <a href={`mailto:${SITE.supportEmail}`}>{SITE.supportEmail}</a>. See our <Link href="/privacy">Privacy Policy</Link>.
+        We send one email to confirm you joined, then only news about Sidekick’s launch. We never sell it or share it for advertising. Every email
+        has a link to remove yourself, or ask us at <a href={`mailto:${SITE.supportEmail}`}>{SITE.supportEmail}</a>. See our{" "}
+        <Link href="/privacy">Privacy Policy</Link>.
       </p>
     ),
   },
@@ -364,7 +366,7 @@ export default function HomePage() {
               <span>
                 <span className="block font-serif text-xl font-semibold">Somewhere else?</span>
                 <span className="mt-1 block text-[15px] text-ink-soft">
-                  Join the waitlist and tell us your school. We’ll open where the most students are waiting.
+                  More campuses come after York. Tell us where you study at {SITE.supportEmail}.
                 </span>
               </span>
             </li>

@@ -101,7 +101,7 @@ describe("the waitlist page", () => {
     assert.equal(s.total, 55);
     assert.equal(s.last7, 4, "the last 7 days include late Saturday Sep 26");
     assert.equal(s.previous7, 1);
-    assert.equal(s.york, 2);
+    assert.equal(s.emailed, 0);
     assert.equal(s.answeredPhone, 3);
     assert.equal(s.iphone, 2);
 

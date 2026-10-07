@@ -13,7 +13,15 @@ export async function GET(request: Request) {
   const iso = (ms: number) => new Date(ms).toISOString();
   return csvResponse(
     `sidekick-waitlist${isFiltered(filters) ? "-filtered" : ""}-${iso(Date.now()).slice(0, 10)}.csv`,
-    ["email", "school", "platform", "source", "signed_up_at", "updated_at"],
-    rows.map((r) => [r.email, r.school, r.platform, r.source, iso(r.created_at), iso(r.updated_at)]),
+    ["email", "school", "platform", "source", "signed_up_at", "updated_at", "confirmation_sent_at"],
+    rows.map((r) => [
+      r.email,
+      r.school,
+      r.platform,
+      r.source,
+      iso(r.created_at),
+      iso(r.updated_at),
+      r.confirmation_sent_at && iso(r.confirmation_sent_at),
+    ]),
   );
 }

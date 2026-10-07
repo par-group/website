@@ -2,12 +2,12 @@
 
 import { useEffect, useId, useRef, useState, useSyncExternalStore, useTransition } from "react";
 import { CheckIcon, ShareIcon } from "@/components/ui/icons";
-import { EMAIL_MAX, PLATFORMS, SCHOOL_MAX, YORK, normalizeEmail, sourceFromLocation, type Platform } from "@/lib/waitlist";
+import { EMAIL_MAX, PLATFORMS, STUDENTS_ONLY, isStudentEmail, isValidEmail, normalizeEmail, sourceFromLocation, type Platform } from "@/lib/waitlist";
 import { SITE } from "@/lib/site";
 import { joinWaitlist, saveWaitlistDetails } from "@/server/actions/waitlist";
 
 // One signup per visit, shared by every form on the page: the form that was
-// used walks through the optional questions, the others just confirm.
+// used walks through the optional question, the others just confirm.
 type Signup = { id: string; email: string; school: string | null; owner: string; step: "details" | "done" };
 
 let signup: Signup | null = null;
@@ -86,6 +86,12 @@ function EmailStep({ owner, tone, buttonLabel }: { owner: string; tone: "light" 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    // The same rule the server enforces, checked here first so the answer is instant.
+    const normalized = normalizeEmail(email);
+    if (!isStudentEmail(normalized)) {
+      setError(isValidEmail(normalized) ? STUDENTS_ONLY : "Enter a valid email address, like yourname@my.yorku.ca.");
+      return;
+    }
     startTransition(async () => {
       try {
         const res = await joinWaitlist({ email, source: currentSource(), website: honeypot.current?.value });
@@ -134,7 +140,7 @@ function EmailStep({ owner, tone, buttonLabel }: { owner: string; tone: "light" 
         </p>
       ) : (
         <p id={`${inputId}-note`} className={`mt-3 px-2 text-sm ${tone === "teal" ? "text-white/80" : "text-ink-soft"}`}>
-          We’ll email you when Sidekick launches. No spam, and you can unsubscribe anytime.
+          For York students: join with your @my.yorku.ca email. We’ll email you when Sidekick launches, and you can leave anytime.
         </p>
       )}
     </form>
@@ -143,8 +149,6 @@ function EmailStep({ owner, tone, buttonLabel }: { owner: string; tone: "light" 
 
 function DetailsStep({ signup }: { signup: Signup }) {
   const heading = useRef<HTMLHeadingElement>(null);
-  const [school, setSchool] = useState<"york" | "other" | null>(signup.school === YORK ? "york" : null);
-  const [otherSchool, setOtherSchool] = useState("");
   const [platform, setPlatform] = useState<Platform | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -158,7 +162,7 @@ function DetailsStep({ signup }: { signup: Signup }) {
     setError(null);
     startTransition(async () => {
       try {
-        const res = await saveWaitlistDetails({ id: signup.id, school: school === "york" ? YORK : school === "other" ? otherSchool : null, platform });
+        const res = await saveWaitlistDetails({ id: signup.id, platform });
         if (res.ok) finish();
         else setError(res.error);
       } catch {
@@ -176,32 +180,10 @@ function DetailsStep({ signup }: { signup: Signup }) {
         You’re on the list!
       </h3>
       <p className="mt-2 text-ink-soft">
-        We’ll email <strong className="text-ink [overflow-wrap:anywhere]">{signup.email}</strong> when Sidekick launches. Two optional questions help us plan where
-        to open next:
+        We’ll email <strong className="text-ink [overflow-wrap:anywhere]">{signup.email}</strong> when Sidekick launches. One optional question helps us plan
+        the launch:
       </p>
       <form onSubmit={submit} className="mt-5 flex flex-col gap-5">
-        <fieldset>
-          <legend className="label">Where do you study?</legend>
-          <div className="flex flex-wrap gap-2">
-            <Choice name="school" checked={school === "york"} onChange={() => setSchool("york")}>
-              {YORK}
-            </Choice>
-            <Choice name="school" checked={school === "other"} onChange={() => setSchool("other")}>
-              Another school
-            </Choice>
-          </div>
-          {school === "other" && (
-            <input
-              aria-label="School name"
-              className="field mt-3"
-              maxLength={SCHOOL_MAX}
-              placeholder="e.g. Toronto Metropolitan University"
-              value={otherSchool}
-              onChange={(e) => setOtherSchool(e.target.value)}
-              autoFocus
-            />
-          )}
-        </fieldset>
         <fieldset>
           <legend className="label">Which phone do you use?</legend>
           <div className="flex flex-wrap gap-2">
@@ -218,8 +200,8 @@ function DetailsStep({ signup }: { signup: Signup }) {
           </p>
         )}
         <div className="flex flex-wrap items-center gap-2">
-          <button type="submit" disabled={pending || (!school && !platform)} className="btn-primary">
-            {pending ? "Saving…" : "Save answers"}
+          <button type="submit" disabled={pending || !platform} className="btn-primary">
+            {pending ? "Saving…" : "Save answer"}
           </button>
           <button type="button" onClick={finish} className="btn-ghost">
             Skip

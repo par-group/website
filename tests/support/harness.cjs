@@ -26,6 +26,14 @@ Module._load = function (request, ...args) {
   return originalLoad.call(this, request.startsWith("@/") ? path.join(SRC, request.slice(2)) : request, ...args);
 };
 
+/**
+ * Replace a module for this test file, e.g. one that sends email or needs a
+ * request in progress. Call before loading the code that imports it.
+ */
+function mock(request, exports) {
+  mocks.set(request, exports);
+}
+
 /** Load site code by its "@/..." specifier. */
 function load(specifier) {
   return require(path.join(SRC, specifier.replace(/^@\//, "")));
@@ -51,4 +59,4 @@ function useTempWorkspace(name) {
   };
 }
 
-module.exports = { load, useTempWorkspace };
+module.exports = { load, mock, useTempWorkspace };

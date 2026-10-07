@@ -17,8 +17,8 @@ const WAITLIST: Faq[] = [
     question: "How do I know I’m on the waitlist?",
     answer: (
       <p>
-        After you join, the page says <strong>You’re on the list</strong>. Joining again with the same email is fine, you won’t be added twice. We’ll
-        email you when Sidekick launches at your school.
+        After you join, the page says <strong>You’re on the list</strong>, and we email a confirmation to your York address. It can take a few
+        minutes, so check your spam folder too. Joining again with the same email is fine: you won’t be added twice.
       </p>
     ),
   },
@@ -26,7 +26,8 @@ const WAITLIST: Faq[] = [
     question: "How do I leave the waitlist?",
     answer: (
       <p>
-        Use the unsubscribe link in any email we send, or email {email} from the address you signed up with and we’ll remove it.
+        Use the link at the bottom of any email we send, including the confirmation, or email {email} from the address you signed up with and
+        we’ll remove it.
       </p>
     ),
   },

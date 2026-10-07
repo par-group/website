@@ -29,6 +29,9 @@ export function SignupTable({ rows, accounts }: { rows: WaitlistSignup[]; accoun
             <th scope="col" className="px-3 py-3 font-semibold">
               Signed up (Toronto)
             </th>
+            <th scope="col" className="px-3 py-3 font-semibold">
+              Emailed
+            </th>
             {accounts && (
               <th scope="col" className="px-5 py-3 font-semibold">
                 App account
@@ -57,6 +60,15 @@ export function SignupTable({ rows, accounts }: { rows: WaitlistSignup[]; accoun
               </td>
               <td className="px-3 py-3 whitespace-nowrap tabular-nums">
                 <time dateTime={new Date(row.created_at).toISOString()}>{signedUp.format(row.created_at)}</time>
+              </td>
+              <td className="px-3 py-3 whitespace-nowrap">
+                {row.confirmation_sent_at ? (
+                  <span className="text-green" title={`Confirmation sent ${signedUp.format(row.confirmation_sent_at)}`}>
+                    ✓ Sent
+                  </span>
+                ) : (
+                  none
+                )}
               </td>
               {accounts && <td className="px-5 py-3">{accounts.has(row.email) ? <span className="font-semibold text-green">✓ Yes</span> : none}</td>}
             </tr>

@@ -68,9 +68,10 @@ docs/                  Deployment, the waitlist export, the /app-demo setup and 
 
 ## How the waitlist works
 
-1. A visitor enters their email. `joinWaitlist` (`src/server/actions/waitlist.ts`) validates it on the server and stores it once, however many times it's submitted. The response is the same either way, so the form never reveals who is on the list.
-2. Two optional questions follow: where they study (pre-filled for York email addresses) and which phone they use.
-3. The confirmation offers a share link (`?ref=share`).
+1. A visitor enters their York email. Only `@my.yorku.ca` addresses are accepted for now (`isStudentEmail` in `src/lib/waitlist.ts`), checked in the form and again on the server. `joinWaitlist` (`src/server/actions/waitlist.ts`) stores it once, however many times it's submitted. The response is the same either way, so the form never reveals who is on the list.
+2. A first signup gets a confirmation email (`src/server/waitlist-email.ts`), sent just after the response. Its "Didn't join? Remove it from the waitlist" link carries a random token (only its hash is stored) and opens `/waitlist/remove/…`, which asks before deleting the signup, so mail scanners that open links can't remove anyone.
+3. One optional question follows: which phone they use.
+4. The confirmation on the page offers a share link (`?ref=share`).
 
 Spam protection is a hidden honeypot field: submissions that fill it get a normal-looking success and nothing is stored. The source label comes from `?ref=`, `utm_*` or the referring site, and the first one is kept for the visit in `sessionStorage`.
 

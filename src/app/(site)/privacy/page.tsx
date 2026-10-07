@@ -29,11 +29,10 @@ export default function PrivacyPage() {
       <p>If you join the waitlist, we collect:</p>
       <ul>
         <li>
-          <strong>Your email address</strong>, to tell you when Sidekick launches at your school.
+          <strong>Your York email address</strong> (@my.yorku.ca), to confirm you joined and tell you when Sidekick launches.
         </li>
         <li>
-          <strong>Your answers to the optional questions</strong>: where you study and which phone you use. They help us decide where to launch
-          next and which app to build.
+          <strong>Your answer to the optional question</strong>: which phone you use. It helps us decide which app to build first.
         </li>
         <li>
           <strong>How you found us</strong>, such as the link on a poster or the site that sent you, and when you signed up. It’s a short label, not
@@ -41,7 +40,8 @@ export default function PrivacyPage() {
         </li>
       </ul>
       <p>
-        We only email waitlist members about Sidekick’s launch, and every email has an unsubscribe link. The website doesn’t use advertising or
+        When you join, we send one email to confirm it, with a link to remove your address if it wasn’t you. After that we only email waitlist
+        members about Sidekick’s launch, and every email has a link to leave the list. The website doesn’t use advertising or
         analytics cookies. It keeps the “how you found us” label in your browser until you close the tab, so it isn’t lost if you look around
         before signing up.
       </p>
@@ -106,8 +106,8 @@ export default function PrivacyPage() {
 
       <h2>How long we keep it</h2>
       <p>
-        <strong>Waitlist:</strong> until you unsubscribe or ask us to remove you, and no longer than we need it to tell you about Sidekick’s launch
-        at your school.
+        <strong>Waitlist:</strong> until you remove yourself or ask us to, and no longer than we need it to tell you about Sidekick’s launch.
+        Removing yourself deletes your signup.
       </p>
       <p>
         <strong>Accounts:</strong> while your account exists. If you deactivate your account in Settings, your profile is hidden but saved so you
@@ -118,7 +118,7 @@ export default function PrivacyPage() {
 
       <h2>Your choices and rights</h2>
       <ul>
-        <li>You can unsubscribe from waitlist emails at any time, using the link in any email or by writing to us.</li>
+        <li>You can leave the waitlist at any time, using the link in any email we send or by writing to us.</li>
         <li>You can view and edit your profile at any time, and change who you see in Settings.</li>
         <li>You can ask us for a copy of your information, ask us to correct it, or ask us to delete it.</li>
         <li>You can withdraw your consent by leaving the waitlist or deleting your account.</li>

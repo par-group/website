@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { AppStoreBadge } from "@/components/site/AppStoreBadge";
-import { CheckIcon, MailIcon, MapPinIcon } from "@/components/ui/icons";
+import { CheckIcon, DeviceIcon, MailIcon } from "@/components/ui/icons";
 import { WaitlistForm } from "@/components/waitlist/WaitlistForm";
 
 export const metadata: Metadata = {
@@ -11,9 +11,9 @@ export const metadata: Metadata = {
 };
 
 const NEXT_STEPS = [
-  { icon: MailIcon, title: "Join with your email", text: "Your @my.yorku.ca address if you have one, but any email works." },
-  { icon: MapPinIcon, title: "Tell us where you are", text: "Two optional questions, your school and your phone, help us decide where to open next." },
-  { icon: CheckIcon, title: "Hear first at launch", text: "We’ll only email you about the launch, and you can unsubscribe anytime." },
+  { icon: MailIcon, title: "Join with your York email", text: "Your @my.yorku.ca address. We’ll send you a confirmation right away." },
+  { icon: DeviceIcon, title: "Tell us your phone", text: "One optional question, iPhone or Android, helps us plan the launch." },
+  { icon: CheckIcon, title: "Hear first at launch", text: "Then only news about the launch, and every email has a link to leave the list." },
 ];
 
 export default function JoinPage() {
@@ -28,8 +28,8 @@ export default function JoinPage() {
             Be first in when Sidekick <span className="text-green italic">opens at York.</span>
           </h1>
           <p className="mt-5 max-w-xl text-lg leading-relaxed text-ink-soft">
-            Leave your email and we’ll tell you the day Sidekick launches. Not at York? Join anyway: we open new campuses where the most students are
-            waiting.
+            Leave your York email and we’ll tell you the day Sidekick launches. The waitlist is for York students, so use your @my.yorku.ca
+            address.
           </p>
           <div className="mt-9 flex w-full justify-center">
             <WaitlistForm />

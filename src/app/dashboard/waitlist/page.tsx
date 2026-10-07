@@ -17,6 +17,7 @@ import {
 } from "@/lib/signup-filters";
 import { appAccountEmails, appDb } from "@/server/app-db";
 import { requireDashboardAccess } from "@/server/dashboard-auth";
+import { emailProvider } from "@/server/mailer";
 import { findSignups, waitlistSummary } from "@/server/waitlist-insights";
 
 export const metadata: Metadata = { title: "Waitlist" };
@@ -71,9 +72,20 @@ export default async function WaitlistPage({ searchParams }: PageProps<"/dashboa
         <Kpi label="Signups" value={count(summary.total)} caption="All time" />
         <Kpi label="Last 7 days" value={count(summary.last7)} change={weekChange(summary.last7, summary.previous7)} />
         <Kpi
-          label="York students"
-          value={percent(summary.york, summary.total)}
-          caption={`${count(summary.york)} of ${count(summary.total)} signups`}
+          label="Emailed"
+          value={count(summary.emailed)}
+          caption={
+            emailProvider() ? (
+              `of ${count(summary.total)} signups got their confirmation`
+            ) : (
+              <>
+                Confirmations aren’t being sent yet.{" "}
+                <Link href="/dashboard/setup" className="font-semibold text-green hover:underline">
+                  Set up email
+                </Link>
+              </>
+            )
+          }
         />
         <Kpi
           label="On iPhone"

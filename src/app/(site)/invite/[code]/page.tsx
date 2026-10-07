@@ -49,7 +49,7 @@ export default function InvitePage() {
             <AppStoreBadge className="mt-9" />
             <p className="mt-4 max-w-md text-sm text-ink-soft">Once you have the app, open this link again and it goes straight to Sidekick.</p>
             <p className="mt-8 text-sm text-ink-soft">
-              On Android, or not at York yet?{" "}
+              On Android?{" "}
               <Link href="/join?ref=invite" className="font-semibold text-green underline">
                 Join the waitlist
               </Link>
