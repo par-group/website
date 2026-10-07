@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { RemoveSignupButton } from "@/components/dashboard/RemoveSignupButton";
 import { TIME_ZONE } from "@/lib/calendar";
 import { signupFiltersQuery } from "@/lib/signup-filters";
 import { PLATFORMS } from "@/lib/waitlist";
@@ -37,6 +38,9 @@ export function SignupTable({ rows, accounts }: { rows: WaitlistSignup[]; accoun
                 App account
               </th>
             )}
+            <th scope="col" className="px-5 py-3">
+              <span className="sr-only">Remove</span>
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -71,6 +75,9 @@ export function SignupTable({ rows, accounts }: { rows: WaitlistSignup[]; accoun
                 )}
               </td>
               {accounts && <td className="px-5 py-3">{accounts.has(row.email) ? <span className="font-semibold text-green">✓ Yes</span> : none}</td>}
+              <td className="px-5 py-2 text-right">
+                <RemoveSignupButton id={row.id} email={row.email} />
+              </td>
             </tr>
           ))}
         </tbody>

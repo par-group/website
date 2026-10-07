@@ -78,6 +78,12 @@ export async function removeSignupByToken(token: string): Promise<boolean> {
   return changes > 0;
 }
 
+/** Deletes a signup by id: the dashboard's Remove. False if it was already gone. */
+export async function removeSignupById(id: string): Promise<boolean> {
+  const { changes } = await run("DELETE FROM waitlist_signups WHERE id = ?", [id]);
+  return changes > 0;
+}
+
 /** Everyone on the list, oldest first (for the CSV export). */
 export function listSignups(): Promise<WaitlistSignup[]> {
   return all<WaitlistSignup>(`SELECT ${COLUMNS} FROM waitlist_signups ORDER BY created_at, email`);

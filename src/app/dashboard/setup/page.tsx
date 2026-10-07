@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { EmailConnectionCheck } from "@/components/dashboard/EmailConnectionCheck";
 import { PageHeader } from "@/components/dashboard/PageHeader";
 import { TIME_ZONE } from "@/lib/calendar";
 import { SITE } from "@/lib/site";
@@ -9,7 +10,7 @@ import { deployment, systemStatus } from "@/server/status";
 export const metadata: Metadata = { title: "Setup" };
 
 type State = "ok" | "off" | "waiting" | "problem";
-type Check = { name: string; state: State; detail: string; next?: string };
+type Check = { name: string; state: State; detail: string; next?: string; action?: React.ReactNode };
 
 // Status always comes with an icon and a word, never colour alone.
 const STATES: Record<State, { icon: string; label: string; className: string }> = {
@@ -46,6 +47,7 @@ export default async function SetupPage() {
           name: "Confirmation emails",
           state: "ok",
           detail: `New signups get a confirmation from ${senderAddress()} (${configured.confirmationEmails === "smtp" ? "SMTP" : "Resend"}).`,
+          action: <EmailConnectionCheck />,
         }
       : {
           name: "Confirmation emails",
@@ -139,6 +141,7 @@ export default async function SetupPage() {
                   <span className="[overflow-wrap:anywhere] text-ink-soft">{check.detail}</span>
                 </p>
                 {check.next && <p className="mt-1.5 text-ink">{check.next}</p>}
+                {check.action}
               </div>
             </li>
           );

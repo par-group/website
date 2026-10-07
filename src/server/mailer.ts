@@ -43,12 +43,12 @@ export async function deliverEmail(message: OutgoingEmail): Promise<void> {
   throw new Error("No email provider configured");
 }
 
-async function sendViaSmtp({ to, subject, text, html, idempotencyKey, headers }: OutgoingEmail) {
+function smtpTransport() {
   const host = smtpHost()!;
   const port = Number(process.env.SMTP_PORT ?? 465);
   // Google shows App Passwords as "abcd efgh ijkl mnop"; the spaces aren't part of it.
   const pass = host === "smtp.gmail.com" ? process.env.SMTP_PASS!.replace(/\s+/g, "") : process.env.SMTP_PASS!;
-  const transport = createTransport({
+  return createTransport({
     host,
     port,
     secure: process.env.SMTP_SECURE ? process.env.SMTP_SECURE === "true" : port === 465,
@@ -57,6 +57,37 @@ async function sendViaSmtp({ to, subject, text, html, idempotencyKey, headers }:
     greetingTimeout: 10_000,
     socketTimeout: 10_000,
   });
+}
+
+/**
+ * Signs in to the email provider without sending anything, for the dashboard's
+ * "Test connection". With SMTP that's a real login, so a wrong password, or a
+ * Zoho plan that can't send from apps, shows up here instead of on the next signup.
+ */
+export async function checkEmailLogin(): Promise<{ ok: true; detail: string } | { ok: false; detail: string }> {
+  const provider = emailProvider();
+  try {
+    if (provider === "smtp") {
+      await smtpTransport().verify();
+      return { ok: true, detail: `${smtpHost()} accepted the login for ${process.env.SMTP_USER}.` };
+    }
+    if (provider === "resend") {
+      const response = await fetch("https://api.resend.com/domains", {
+        headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}` },
+        signal: AbortSignal.timeout(10_000),
+      });
+      return response.ok
+        ? { ok: true, detail: "Resend accepted the API key." }
+        : { ok: false, detail: `Resend refused the API key (HTTP ${response.status}).` };
+    }
+    return { ok: false, detail: "No email provider is configured." };
+  } catch (e) {
+    return { ok: false, detail: e instanceof Error ? e.message : String(e) };
+  }
+}
+
+async function sendViaSmtp({ to, subject, text, html, idempotencyKey, headers }: OutgoingEmail) {
+  const transport = smtpTransport();
   const info = await transport.sendMail({
     from: senderAddress()!,
     to,
